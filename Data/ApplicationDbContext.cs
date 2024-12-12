@@ -10,5 +10,12 @@ namespace Discord2.Data
             : base(options)
         {
         }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<GroupRole> GroupRoles { get; set; }
+        public DbSet<Membership> Memberships { get; set; }
+        public DbSet<Channel> Channels { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        //public DbSet<Group> Groups { get; set; }
     }
 }

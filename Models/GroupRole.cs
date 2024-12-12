@@ -5,6 +5,7 @@ namespace Discord2.Models
     public class GroupRole
     {
         [Key]
+        public int Id { get; set; }
         public string Name { get; set; }
 
         public bool CanWrite { get; set; } = true;
@@ -13,6 +14,6 @@ namespace Discord2.Models
 
         public bool CanManipulateUsers { get; set; } = false;
 
-        public virtual ICollection<UserRoleMembership>? UserRoleMemberships { get; set; }
+        public virtual ICollection<Membership>? UserRoleMemberships { get; set; }
     }
 }

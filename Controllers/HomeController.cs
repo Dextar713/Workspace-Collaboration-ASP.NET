@@ -1,20 +1,26 @@
 using System.Diagnostics;
+using Discord2.Data;
 using Discord2.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Discord2.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly ApplicationDbContext db;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
         {
             _logger = logger;
+            db = context;
         }
 
         public IActionResult Index()
         {
+            var groups = db.Groups.Take(5).ToList();
+            ViewBag.Groups = groups;
             return View();
         }
 

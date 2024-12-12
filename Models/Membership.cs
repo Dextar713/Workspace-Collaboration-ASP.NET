@@ -12,10 +12,15 @@ namespace Discord2.Models
 
         public int? GroupId { get; set; }
 
+        public int? GroupRoleId { get; set; }
+
         public virtual AppUser? User { get; set; }
 
         public virtual Group? Group { get; set; }
 
+        public virtual GroupRole? Role { get; set; }
+
         public DateTime JoinDate { get; set; } = DateTime.Now;
+
     }
 }
