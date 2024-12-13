@@ -1,0 +1,11 @@
+﻿<h2>List of channels</h2>
+<br />
+
+@foreach (var channel in ViewBag.Channels)
+{
+    <p>@channel.Id</p>
+    <p>@channel.Name</p>
+    <a href="/Channels/Show/@channel.Id">See this channel</a>
+    <hr />
+}
+<a href="/Channels/New">Add a new channel</a>

@@ -1,0 +1,12 @@
+﻿<h2>Afisare Channel</h2>
+
+<br />
+
+<p>@ViewBag.Channel.Id</p>
+<p>@ViewBag.Channel.Name</p>
+<a href="/Channels/Index">Show all channels</a>
+<hr />
+
+<form method="post" action="/Channels/Delete/@ViewBag.Channel.Id">
+    <button type="submit">Delete channel</button>
+</form>

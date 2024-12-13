@@ -1,0 +1,45 @@
+﻿@model Discord2.Models.Channel
+
+<!--
+<h2>Formular adaugare Channel</h2>
+
+<form method="post" action="/Channels/New">
+    <label>Nume</label>
+    <br />
+    <input type="text" name="Name" />
+    <br /><br />
+    <button type="submit">Adauga Channel</button>
+</form>
+-->
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-6 offset-3">
+            <form method="post" asp-action="New" asp-controller="Channels">
+                <!-- errors -->
+                <div asp-validation-summary="All" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="Name" class="form-label">Channel Name</label>
+                    <br />
+                    <input asp-for="Name" class="form-control" />
+
+                    <!-- print error -->
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description" class="form-label">Channel Description</label>
+                    <br />
+                    <input asp-for="Description" class="form-control" />
+
+                    <!-- print error -->
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <br />
+                <button class="btn btn-success" type="submit">Add Channel</button>
+            </form>
+        </div>
+    </div>
+</div>
