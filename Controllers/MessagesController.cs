@@ -23,7 +23,7 @@ namespace Discord2.Controllers
         [HttpPost]
         public IActionResult New(Message msg)
         {
-            msg.Date = DateTime.Now;
+            msg.DateTime = DateTime.Now;
             if (ModelState.IsValid)
             {
                 db.Messages.Add(msg);

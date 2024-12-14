@@ -72,7 +72,6 @@ namespace Discord2.Controllers
             TempData["message"] = string.Join("; ", errors);
             ViewBag.Categories = db.Categories.Select(c => new { c.Id, c.Name }).ToList();
             return View(c);
-            }
         }
         // delete
         public IActionResult Delete(int id)
