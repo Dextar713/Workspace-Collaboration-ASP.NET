@@ -1,0 +1,24 @@
+﻿@{
+    ViewBag.Title = "Categories";
+}
+
+<h2>@ViewBag.Title</h2>
+<br />
+
+<a href="/Channels/Index">View channels</a>
+<br />
+<br />
+
+@foreach (var category in ViewBag.Categories)
+{
+    <p>@category.Name</p>
+    <a class="btn alert-success" href="/Categories/Show/@category.Id">See category</a>
+    <a class="btn alert-success" href="/Categories/Edit/@category.Id">Edit category</a>
+    <br />
+    <hr />
+    <br />
+}
+<br />
+<a class="btn btn-success" href="/Categories/New">Add category</a>
+<br />
+

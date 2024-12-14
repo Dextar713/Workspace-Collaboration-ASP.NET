@@ -1,12 +1,94 @@
-﻿<h2>Afisare Channel</h2>
+﻿<!--
+<h2>Afisare Channel</h2>
 
 <br />
 
 <p>@ViewBag.Channel.Id</p>
 <p>@ViewBag.Channel.Name</p>
+<p>@ViewBag.Channel.Description</p>
 <a href="/Channels/Index">Show all channels</a>
 <hr />
 
 <form method="post" action="/Channels/Delete/@ViewBag.Channel.Id">
     <button type="submit">Delete channel</button>
 </form>
+-->
+
+<div class="d-flex justify-content-center">
+    <a class="btn btn-outline-success" href="/Channels/Index/">See all channels</a>
+    <a class="btn btn-outline-success" href="/Channels/New">Add channel</a>
+</div>
+
+<br />
+
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title alert-success py-3 px-3 rounded-2">@ViewBag.Channel.Name</h3>
+        <div class="card-text">@ViewBag.Channel.Description</div>
+    </div>
+
+    <hr />
+
+    <div class="d-flex flex-row justify-content-between">
+        <form method="post" asp-controller="Channels" asp-action="Delete" asp-route-id="@ViewBag.Channel.Id">
+            <button class="btn btn-danger" type="submit">Delete channel</button>
+        </form>
+    </div>
+</div>
+
+<br />
+<br />
+
+@foreach (var msg in ViewBag.Channel.Messages)
+{
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <div>
+                    <p>@msg.Content</p>
+                    <small>@msg.Date</small>
+                </div>
+
+                <br>
+
+                <div class="d-flex">
+                    <!--
+                    <div>
+                        <a class="btn btn-outline-primary" href="/Comments/Edit/@msg.Id"><i class="bi bi-pencil-square"></i>Editeaza</a>
+                    </div>
+                    -->
+
+                    <div>
+                        <form method="post" asp-controller="Messages" asp-action="Delete" asp-route-id="@msg.Id">
+                            <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i>Delete</button>
+                        </form>
+                    </div>
+                </div>
+                <br />
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+    </div>
+}
+
+@*adaugarea unui mesaj*@
+<div class="container">
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+            <div class="card">
+                <form method="post" action="/Messages/New">
+                    <div class="card-body">
+                        <input type="hidden" name="ChannelId" value="@ViewBag.Channel.Id" />
+                        <br />
+                        <textarea class="form-control" name="Content"></textarea>
+                        <br />
+                        <button class="btn btn-success " type="submit">Send message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+</div>

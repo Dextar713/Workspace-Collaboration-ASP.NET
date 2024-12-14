@@ -6,6 +6,7 @@ namespace Discord2.Models
     {
         [Key]
         public int Id { get; set; }
+        [Required(ErrorMessage = "The name is required!")]
         public string Name { get; set; }
 
         public virtual ICollection<Channel>? Channels { get; set; }

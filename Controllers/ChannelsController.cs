@@ -1,6 +1,8 @@
 ﻿using Discord2.Data;
 using Discord2.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace Discord2.Controllers
 {
@@ -23,7 +25,11 @@ namespace Discord2.Controllers
         // show
         public ActionResult Show(int id)
         {
-            Channel channel = db.Channels.Find(id);
+            //Channel channel = db.Channels.Find(id);
+            //ViewBag.Channel = channel;
+            //return View();
+
+            Channel channel = db.Channels.Include("Messages").Where(c => c.Id == id).First();
             ViewBag.Channel = channel;
             return View();
         }
@@ -31,6 +37,8 @@ namespace Discord2.Controllers
         public IActionResult New()
         {
             return View();
+            //Channel channel = new Channel();
+            //return View(channel);
         }
         [HttpPost]
         public IActionResult New(Channel c)
@@ -54,5 +62,21 @@ namespace Discord2.Controllers
             db.SaveChanges();
             return RedirectToAction("Index");
         }
+
+        //[HttpPost]
+        //public IActionResult Show([FromForm] Message msg)
+        //{
+        //    msg.Date = DateTime.Now;
+        //    if (ModelState.IsValid)
+        //    {
+        //        db.Messages.Add(msg);
+        //        db.SaveChanges();
+        //        return Redirect("/Channels/Show/" + msg.ChannelId);
+        //    }
+            
+        //    Channel c = db.Channels.Include("Messages").Where(c => c.Id == msg.ChannelId).First();
+        //    //return Redirect("/Articles/Show/" + comment.ArticleId);
+        //    return View(c);
+        //}
     }
 }

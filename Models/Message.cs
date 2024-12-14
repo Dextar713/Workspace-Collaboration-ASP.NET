@@ -7,12 +7,17 @@ namespace Discord2.Models
         [Key]
         public int Id { get; set; }
 
+        [Required]  
+        public string Content { get; set; }
+
+        public DateTime Date { get; set; } 
+
         public int? ChannelId { get; set; }
 
-        public string? UserId { get; set; }
+        //public string? UserId { get; set; }
 
         public virtual Channel? Channel { get; set; }
 
-        public virtual AppUser? User { get; set; }
+        //public virtual AppUser? User { get; set; }
     }
 }

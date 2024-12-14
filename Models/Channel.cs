@@ -21,6 +21,6 @@ namespace Discord2.Models
 
         public virtual Category? Category { get; set; }
 
-        public virtual ICollection<Message> Messages { get; set; }
+        public virtual ICollection<Message>? Messages { get; set; }
     }
 }
