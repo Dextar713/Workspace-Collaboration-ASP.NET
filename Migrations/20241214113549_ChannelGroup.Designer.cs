@@ -4,6 +4,7 @@ using Discord2.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Discord2.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241214113549_ChannelGroup")]
+    partial class ChannelGroup
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -116,11 +119,9 @@ namespace Discord2.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CategoryId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int?>("GroupId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -226,7 +227,6 @@ namespace Discord2.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("ChannelId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("Content")
@@ -237,7 +237,6 @@ namespace Discord2.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -390,15 +389,11 @@ namespace Discord2.Migrations
                 {
                     b.HasOne("Discord2.Models.Category", "Category")
                         .WithMany("Channels")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CategoryId");
 
                     b.HasOne("Discord2.Models.Group", "Group")
                         .WithMany("Channels")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GroupId");
 
                     b.Navigation("Category");
 
@@ -430,15 +425,11 @@ namespace Discord2.Migrations
                 {
                     b.HasOne("Discord2.Models.Channel", "Channel")
                         .WithMany("Messages")
-                        .HasForeignKey("ChannelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ChannelId");
 
                     b.HasOne("Discord2.Models.AppUser", "User")
                         .WithMany("Messages")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Channel");
 

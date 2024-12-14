@@ -1,56 +1,43 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using Discord2.Models
+@{
+    ViewData["Title"] = "Welcome to Discord2";
+    var topGroups = ViewBag.TopGroups as List<Group>;
 }
 
-
-
-<div class="row">
-    <!-- Sidebar (Groups & Channels) -->
-    <div class="col-md-3">
-        <h4>Groups</h4>
-        <div class="list-group">
-            <a href="#group1" class="list-group-item list-group-item-action">Group 1</a>
-            <a href="#group2" class="list-group-item list-group-item-action">Group 2</a>
-            <a href="#group3" class="list-group-item list-group-item-action">Group 3</a>
-        </div>
-
-        <h4 class="mt-4">Channels</h4>
-        <div class="list-group">
-            <a href="#channel1" class="list-group-item list-group-item-action">#General</a>
-            <a href="#channel2" class="list-group-item list-group-item-action">#Development</a>
-            <a href="#channel3" class="list-group-item list-group-item-action">#Design</a>
-        </div>
+<div class="container mt-5">
+    <partial name="_TempDataPartial" />
+    <!-- Welcome Section -->
+    <div class="jumbotron text-center bg-primary text-white p-5 rounded">
+        <h1 class="display-4">Welcome to Discord2!</h1>
+        <p class="lead">Your go-to workspace for seamless collaboration and communication.</p>
+        <hr class="my-4">
+        <p>Explore groups, join discussions, and stay connected with your team!</p>
+        <a class="btn btn-light btn-lg" href="/Groups" role="button">Explore Groups</a>
     </div>
 
-    <!-- Chat Area (Messages) -->
-    <div class="col-md-9">
-        <div class="channel" id="channel1">
-            <h5>#General</h5>
-            <div class="message-box">
-                <div class="message"><strong>User1:</strong> Hello, team!</div>
-                <div class="message"><strong>User2:</strong> Good morning!</div>
-                <div class="message"><strong>User3:</strong> Let's discuss the next project.</div>
-            </div>
-            <input type="text" class="form-control input-message" placeholder="Type a message...">
-        </div>
-
-        <div class="channel" id="channel2">
-            <h5>#Development</h5>
-            <div class="message-box">
-                <div class="message"><strong>DevUser1:</strong> The API is almost ready!</div>
-                <div class="message"><strong>DevUser2:</strong> Great, I will test it soon.</div>
-            </div>
-            <input type="text" class="form-control input-message" placeholder="Type a message...">
-        </div>
-
-        <div class="channel" id="channel3">
-            <h5>#Design</h5>
-            <div class="message-box">
-                <div class="message"><strong>DesignUser1:</strong> Here is the new UI prototype.</div>
-                <div class="message"><strong>DesignUser2:</strong> Looks great, let's refine the colors.</div>
-            </div>
-            <input type="text" class="form-control input-message" placeholder="Type a message...">
+    <!-- Top 5 Most Popular Groups Section -->
+    <div class="mt-5">
+        <h2 class="text-center mb-4">Top 5 Most Popular Groups</h2>
+        <div class="row">
+            @if (topGroups != null && topGroups.Any())
+            {
+                foreach (var group in topGroups)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">@group.Name</h5>
+                                <p class="card-text">@group.Description</p>
+                                <a href="/Groups/Show/@group.Id" class="btn btn-primary">View Group</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-center text-muted">No groups to display at the moment.</p>
+            }
         </div>
     </div>
 </div>
-

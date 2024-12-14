@@ -7,10 +7,10 @@ namespace Discord2.Models
         [Key]
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "The name is required!")]
         public string Name { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "The description is required!")]
         public string Description { get; set; }
 
         public DateTime CreationDate { get; set; } = DateTime.Now;

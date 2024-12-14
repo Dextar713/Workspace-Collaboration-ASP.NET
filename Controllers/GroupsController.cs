@@ -23,26 +23,35 @@ namespace Discord2.Controllers
         }
 
         [Authorize(Roles = "User,Admin")]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             var userId = _userManager.GetUserId(User);
 
             // Fetch groups the user is part of
-            var groupsQuery = db.Groups
+            var userGroups = db.Groups
                 .Where(g => g.Memberships.Any(m => m.UserId == userId));
 
-            var searchTerm= HttpContext.Request.Query["search"].FirstOrDefault()?.Trim();
-            // Filter groups by search term if entered
+            var searchTerm = HttpContext.Request.Query["searchTerm"].FirstOrDefault()?.Trim();
+
+            // Initialize the query with user's groups
+            IQueryable<Group> groupsQuery = userGroups;
+
             if (!string.IsNullOrEmpty(searchTerm))
             {
-                groupsQuery = groupsQuery.Where(g => g.Name.Contains(searchTerm));
+                // Fetch groups that match the search term
+                var searchedGroups = db.Groups
+                    .Where(g => g.Name.Contains(searchTerm) || g.Description.Contains(searchTerm));
+
+                // Combine user's groups with searched groups
+                groupsQuery = groupsQuery.Union(searchedGroups);
             }
 
-            var groups = await groupsQuery.ToListAsync();
+            var groups = groupsQuery.Distinct().ToList();
 
             ViewBag.SearchTerm = searchTerm;
             return View(groups);
         }
+
         [Authorize(Roles = "Admin,User")]
         public IActionResult Show(int id)
         {
@@ -52,9 +61,11 @@ namespace Discord2.Controllers
             if (isUserInGroup || User.IsInRole("Admin"))
             {
 
-                var data = (from g in db.Groups.Include(g => g.Channels).Include("Channels.Category")
+                var data = (from g in db.Groups.Include(g => g.Channels).ThenInclude(c => c.Category)
+                            .Include(g => g.Channels).ThenInclude(c => c.Messages)
+                            .ThenInclude(m => m.User)
                             where g.Id == id
-                            select g).ToList();
+                            select g).FirstOrDefault();
                 return View(data);
             } else
             {

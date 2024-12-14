@@ -20,7 +20,7 @@ namespace Discord2.Controllers
         public IActionResult Index()
         {
             var groups = db.Groups.Take(5).ToList();
-            ViewBag.Groups = groups;
+            ViewBag.TopGroups = groups;
             return View();
         }
 

@@ -43,6 +43,18 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "SendMessage",
+    pattern: "Channels/SendMessage/{channelId?}/{message?}",
+    defaults: new { controller = "Channels", action = "SendMessage" }
+);
+
+app.MapControllerRoute(
+    name: "AddChannel",
+    pattern: "Channels/New/{groupId?}",
+    defaults: new { controller = "Channels", action = "New" }
+);
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();

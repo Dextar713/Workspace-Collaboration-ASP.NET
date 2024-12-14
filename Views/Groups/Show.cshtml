@@ -1,56 +1,97 @@
-﻿@{
-    ViewData["Title"] = "Group 1";
+﻿@model Discord2.Models.Group
+
+@{
+    ViewData["Title"] = Model.Name;
 }
 
-
-
-<div class="row">
-    <!-- Sidebar (Groups & Channels) -->
-    <div class="col-md-3">
-        <h4>Groups</h4>
-        <div class="list-group">
-            <a href="#group1" class="list-group-item list-group-item-action">Group 1</a>
-            <a href="#group2" class="list-group-item list-group-item-action">Group 2</a>
-            <a href="#group3" class="list-group-item list-group-item-action">Group 3</a>
-        </div>
-
-        <h4 class="mt-4">Channels</h4>
-        <div class="list-group">
-            <a href="#channel1" class="list-group-item list-group-item-action">#General</a>
-            <a href="#channel2" class="list-group-item list-group-item-action">#Development</a>
-            <a href="#channel3" class="list-group-item list-group-item-action">#Design</a>
+<div class="container mt-4">
+    <partial name="_TempDataPartial" />
+    <!-- Group Details Card -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title">@Model.Name</h2>
+            <p class="card-text">@Model.Description</p>
+            <p class="text-muted">Created on: @Model.CreationDate.ToShortDateString()</p>
+            <a href="/Groups/Members/@Model.Id" class="btn btn-primary">View Members</a>
         </div>
     </div>
 
-    <!-- Chat Area (Messages) -->
-    <div class="col-md-9">
-        <div class="channel" id="channel1">
-            <h5>#General</h5>
-            <div class="message-box">
-                <div class="message"><strong>User1:</strong> Hello, team!</div>
-                <div class="message"><strong>User2:</strong> Good morning!</div>
-                <div class="message"><strong>User3:</strong> Let's discuss the next project.</div>
+    <div class="row">
+        <!-- Channels Sidebar -->
+        <div class="col-md-3">
+            <h4>Channels</h4>
+            <div class="mb-3">
+                <a href="/Channels/New/@Model.Id" class="btn btn-success w-100">Add Channel</a>
             </div>
-            <input type="text" class="form-control input-message" placeholder="Type a message...">
+            <div class="list-group">
+                @if (Model.Channels != null && Model.Channels.Any())
+                {
+                    foreach (var channel in Model.Channels)
+                    {
+                        <a href="/Channels/Show/@channel.Id" class="list-group-item list-group-item-action">#@channel.Name</a>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">No channels available.</p>
+                }
+            </div>
         </div>
 
-        <div class="channel" id="channel2">
-            <h5>#Development</h5>
-            <div class="message-box">
-                <div class="message"><strong>DevUser1:</strong> The API is almost ready!</div>
-                <div class="message"><strong>DevUser2:</strong> Great, I will test it soon.</div>
-            </div>
-            <input type="text" class="form-control input-message" placeholder="Type a message...">
-        </div>
+        <!-- Chat Area -->
+        <div class="col-md-9">
+            @if (Model.Channels != null && Model.Channels.Any())
+            {
+                foreach (var channel in Model.Channels)
+                {
+                    <div class="channel mb-4" id="channel@channel.Id">
+                        <h5>#@channel.Name</h5>
+                        <div class="message-box" id="msg-box-@channel.Id" style="max-height: 400px; overflow-y: auto;">
+                            @if (channel.Messages != null && channel.Messages.Any())
+                            {
+                                foreach (var message in channel.Messages.OrderByDescending(m => m.DateTime))
+                                {
+                                    <div class="message mb-3" data-message-id="@message.Id">
+                                        <strong>@message.User?.UserName:</strong> @message.Content
+                                        <br />
+                                        <small class="text-muted">@message.DateTime.ToString("g")</small>
+                                    </div>
 
-        <div class="channel" id="channel3">
-            <h5>#Design</h5>
-            <div class="message-box">
-                <div class="message"><strong>DesignUser1:</strong> Here is the new UI prototype.</div>
-                <div class="message"><strong>DesignUser2:</strong> Looks great, let's refine the colors.</div>
-            </div>
-            <input type="text" class="form-control input-message" placeholder="Type a message...">
+                                    <div class="dropdown" id="contextMenu" style="display: none;">
+                                        <button class="btn btn-sm btn-secondary dropdown-toggle" 
+                                        type="button" id="contextMenuButton" data-bs-toggle="dropdown" 
+                                        aria-expanded="false">
+                                            Options
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="contextMenuButton">
+                                            <li><a class="dropdown-item" href="#" id="editMessage">Edit</a></li>
+                                            <li><a class="dropdown-item" href="#" id="deleteMessage">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted">No messages yet. Be the first to start the conversation!</p>
+                            }
+                        </div>
+                        <div>
+                            <form id="messageForm-@channel.Id" method="post" asp-controller="Channels" asp-action="SendMessage">
+                                <input type="hidden" name="channelId" value="@channel.Id" />
+                                <div class="input-group">
+                                    <input type="text" name="message" id="messageInput-@channel.Id"
+                                           class="form-control" placeholder="Type your message..." />
+                                    <button type="submit" class="btn btn-primary">Send</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-center text-muted">No channels to display.</p>
+            }
         </div>
     </div>
 </div>
-

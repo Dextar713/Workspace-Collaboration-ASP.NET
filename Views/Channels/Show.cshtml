@@ -1,0 +1,66 @@
+﻿@model Discord2.Models.Channel
+
+@{
+    ViewData["Title"] = $"#{Model.Name} - {Model.Group?.Name}";
+}
+
+<div class="container mt-4">
+    <partial name="_TempDataPartial" />
+    <!-- Channel Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">#@Model.Name</h2>
+            <p class="text-muted">Group: <a href="/Groups/Show/@Model.GroupId">@Model.Group?.Name</a></p>
+        </div>
+        <a href="/Groups/Show/@Model.GroupId" class="btn btn-secondary">Back to Group</a>
+    </div>
+
+    <!-- Messages Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Messages</h5>
+            <div class="message-box" id="msg-box-@Model.Id" style="max-height: 400px; overflow-y: auto;">
+                @if (Model.Messages != null && Model.Messages.Any())
+                {
+                    foreach (var message in Model.Messages.OrderByDescending(m => m.DateTime))
+                    {
+                        <div class="message mb-3" data-message-id="@message.Id">
+                            <strong>@message.User?.UserName:</strong> @message.Content
+                            <br />
+                            <small class="text-muted">@message.DateTime.ToString("g")</small>
+                        </div>
+
+                        <div class="dropdown" id="contextMenu" style="position: absolute; display: none;">
+                            <button class="btn btn-sm btn-secondary dropdown-toggle"
+                                    type="button" id="contextMenuButton" data-bs-toggle="dropdown"
+                                    aria-expanded="false" style="display: none;">
+                                Options
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="contextMenuButton">
+                                <li><a class="dropdown-item" href="#" id="editMessage">Edit</a></li>
+                                <li><a class="dropdown-item" href="#" id="deleteMessage">Delete</a></li>
+                            </ul>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">No messages yet. Be the first to start the conversation!</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Input Section -->
+    <div>
+        <form id="messageForm" method="post" action="/Channels/SendMessage">
+            <input type="hidden" name="channelId" value="@Model.Id" />
+            <div class="input-group">
+                <input type="text" name="message" id="messageInput" class="form-control" placeholder="Type your message..." />
+                <button type="submit" class="btn btn-primary">Send</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
