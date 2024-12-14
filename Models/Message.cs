@@ -20,6 +20,6 @@ namespace Discord2.Models
 
         public virtual Channel? Channel { get; set; }
 
-        public virtual AppUser? User { get; set; }
+        //public virtual AppUser? User { get; set; }
     }
 }

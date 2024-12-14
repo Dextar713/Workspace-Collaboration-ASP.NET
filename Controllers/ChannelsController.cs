@@ -2,6 +2,7 @@
 using Discord2.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 
@@ -47,7 +48,7 @@ namespace Discord2.Controllers
             {
                 TempData["message"] = "Group not found.";
                 return RedirectToAction("Show", "Groups", new { id = groupId });
-            }
+        }
 
             var model = new Channel
             {
@@ -71,6 +72,7 @@ namespace Discord2.Controllers
             TempData["message"] = string.Join("; ", errors);
             ViewBag.Categories = db.Categories.Select(c => new { c.Id, c.Name }).ToList();
             return View(c);
+            }
         }
         // delete
         public IActionResult Delete(int id)
@@ -78,8 +80,8 @@ namespace Discord2.Controllers
             Channel? channel = db.Channels.FirstOrDefault(c => c.Id == id);
             if (channel != null)
             {
-                db.Channels.Remove(channel);
-                db.SaveChanges();
+            db.Channels.Remove(channel);
+            db.SaveChanges();
                 return RedirectToAction("Show", "Groups", new { id = channel.GroupId });
             } else
             {
@@ -97,7 +99,7 @@ namespace Discord2.Controllers
             if (channel == null || string.IsNullOrWhiteSpace(message))
             {
                 return Json(new { success = false });
-            }
+        }
 
             // Create a new message
             var userId = _userManager.GetUserId(User);
@@ -127,7 +129,7 @@ namespace Discord2.Controllers
                     DateTime = newMessage.DateTime.ToString("g")
                 }
             };
-
+            
             return Json(responseMessage);
         }
     }
