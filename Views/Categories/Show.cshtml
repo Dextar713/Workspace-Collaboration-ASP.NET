@@ -1,18 +1,20 @@
-﻿@{
-    ViewBag.Title = "Afisare categorie";
+﻿@model Discord2.Models.Category
+@{
+    ViewBag.Title = "Category " + Model.Name;
 }
 
 
-<h2>@ViewBag.Title</h2>
-<br />
+<div class="container">
+    <partial name="_TempDataPartial" />
+    <h2>@ViewBag.Title</h2>
+    <br />
+    <form method="post" action="/Categories/Edit/@Model.Id">
+        <label asp-for="Name" class="form-label">Category Name</label>
+        <input asp-for="Name" class="form-control" placeholder="Enter category name" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+        <button class="btn btn-primary" type="submit">Edit</button>
+    </form>
 
-<p>@ViewBag.Category.Name</p>
-<form method="post" action="/Categories/Delete/@ViewBag.Category.Id">
-    <button class="btn btn-danger" type="submit">Delete</button>
-</form>
-
-<br />
-<a class="btn alert-success" href="/Categories/Index/">See categories</a>
-<br />
-<hr />
-<br />
+    <br />
+    <a class="btn alert-success" href="/Categories/Index/">See categories</a>
+</div>

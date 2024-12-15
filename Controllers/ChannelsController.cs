@@ -1,5 +1,6 @@
 ﻿using Discord2.Data;
 using Discord2.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -21,7 +22,8 @@ namespace Discord2.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
         }
-        // index 
+
+        [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult Index()
         {
             var channels = from channel in db.Channels
@@ -30,7 +32,8 @@ namespace Discord2.Controllers
             ViewBag.Channels = channels;
             return View();
         }
-        // show
+
+        [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult Show(int id)
         {
             Channel channel = db.Channels.Include(c => c.Group)
@@ -39,8 +42,8 @@ namespace Discord2.Controllers
             //ViewBag.Channel = channel;
             return View(channel);
         }
-        // new
-        
+
+        [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult New(int groupId)
         {
             var group = db.Groups.FirstOrDefault(g => g.Id == groupId);
@@ -48,7 +51,7 @@ namespace Discord2.Controllers
             {
                 TempData["message"] = "Group not found.";
                 return RedirectToAction("Show", "Groups", new { id = groupId });
-        }
+            }
 
             var model = new Channel
             {
@@ -57,7 +60,9 @@ namespace Discord2.Controllers
             ViewBag.Categories = db.Categories.Select(c => new { c.Id, c.Name }).ToList();
             return View(model);
         }
+
         [HttpPost]
+        [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult New(Channel c)
         {
             if (ModelState.IsValid)
@@ -73,14 +78,15 @@ namespace Discord2.Controllers
             ViewBag.Categories = db.Categories.Select(c => new { c.Id, c.Name }).ToList();
             return View(c);
         }
-        // delete
+
+        [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult Delete(int id)
         {
             Channel? channel = db.Channels.FirstOrDefault(c => c.Id == id);
             if (channel != null)
             {
-            db.Channels.Remove(channel);
-            db.SaveChanges();
+                db.Channels.Remove(channel);
+                db.SaveChanges();
                 return RedirectToAction("Show", "Groups", new { id = channel.GroupId });
             } else
             {
@@ -90,6 +96,7 @@ namespace Discord2.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult SendMessage(int channelId, string message)
         {
             var channel = db.Channels.Include(c => c.Group).FirstOrDefault(c => c.Id == channelId);

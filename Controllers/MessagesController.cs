@@ -1,5 +1,6 @@
 ﻿using Discord2.Data;
 using Discord2.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +22,7 @@ namespace Discord2.Controllers
 
         // adaugarea unui mesaj asociat unui canal
         [HttpPost]
+        [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult New(Message msg)
         {
             msg.DateTime = DateTime.Now;
@@ -35,16 +37,13 @@ namespace Discord2.Controllers
 
         // stergerea unui mesaj asociat unui canal
         [HttpPost]
+        [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult Delete(int id)
         {
-            Message msg = db.Messages.Find(id);
+            Message msg = db.Messages.First(m => m.Id == id);
             db.Messages.Remove(msg);
             db.SaveChanges();
             return Redirect("/Channels/Show/" + msg.ChannelId);
-        }
-        public IActionResult Index()
-        {
-            return View();
         }
     }
 }

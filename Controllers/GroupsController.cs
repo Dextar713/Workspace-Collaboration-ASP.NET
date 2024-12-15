@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-//using System.Text.RegularExpressions;
+using System.Threading.Channels;
 
 namespace Discord2.Controllers
 {
@@ -22,7 +22,7 @@ namespace Discord2.Controllers
             db = context;
         }
 
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult Index()
         {
             var userId = _userManager.GetUserId(User);
@@ -52,7 +52,7 @@ namespace Discord2.Controllers
             return View(groups);
         }
 
-        [Authorize(Roles = "Admin,User")]
+        [Authorize(Roles = "Admin,User,Moderator")]
         public IActionResult Show(int id)
         {
             var userId = _userManager.GetUserId(User);
@@ -73,14 +73,14 @@ namespace Discord2.Controllers
                 return RedirectToAction("Index", "Home");
             }
         }
-        [Authorize(Roles ="User,Admin")]
+        [Authorize(Roles ="User,Admin,Moderator")]
         public IActionResult New()
         {
             return View();
         }
 
         [HttpPost]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult New(Group g)
         {
             if (ModelState.IsValid)
@@ -103,6 +103,24 @@ namespace Discord2.Controllers
             } else
             {
                 return View();
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "User,Admin,Moderator")]
+        public IActionResult Delete(int id)
+        {
+            Group? gr = db.Groups.FirstOrDefault(g => g.Id == id);
+            if (gr != null)
+            {
+                db.Groups.Remove(gr);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                TempData["message"] = "Group not found.";
+                return RedirectToAction("Index");
             }
         }
     }

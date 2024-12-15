@@ -16,6 +16,24 @@ namespace Discord2.Data
         public DbSet<Channel> Channels { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Category> Categories { get; set; }
-        //public DbSet<Group> Groups { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Configure cascade delete for Memberships
+            modelBuilder.Entity<Membership>()
+                .HasOne(m => m.Group)
+                .WithMany(g => g.Memberships)
+                .HasForeignKey(m => m.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure cascade delete for Channels
+            modelBuilder.Entity<Channel>()
+                .HasOne(c => c.Group)
+                .WithMany(g => g.Channels)
+                .HasForeignKey(c => c.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

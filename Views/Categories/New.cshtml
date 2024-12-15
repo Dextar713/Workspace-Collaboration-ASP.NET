@@ -1,13 +1,23 @@
 ﻿@model Discord2.Models.Category
 
-<h2>Add category</h2>
+@{
+    ViewData["Title"] = "Add Category";
+}
 
-<form method="post" asp-action="New" asp-controller="Categories">
-    <div asp-validation-summary="All" class="text-danger"></div>
-    <label>Name</label>
-    <br />
-    <input type="text" name="Name" />
-    <br /><br />
-    <button class="btn btn-success" type="submit">Add category</button>
-    <span asp-validation-for="Name" class="text-danger"></span>
-</form>
+<div class="container mt-4">
+    <partial name="_TempDataPartial" />
+    <h2 class="mb-4">Add a New Category</h2>
+
+    <form method="post" asp-controller="Categories" asp-action="New">
+        <!-- Category Name -->
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Category Name</label>
+            <input asp-for="Name" class="form-control" placeholder="Enter category name" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">Add Category</button>
+        <a href="/Categories" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

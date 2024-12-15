@@ -1,5 +1,7 @@
 ﻿using Discord2.Data;
 using Discord2.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Discord2.Controllers
@@ -7,72 +9,81 @@ namespace Discord2.Controllers
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext db;
-        public CategoriesController(ApplicationDbContext context)
+        private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public CategoriesController(ApplicationDbContext context,
+                                    UserManager<AppUser> userManager,
+                                    RoleManager<IdentityRole> roleManager)
         {
             db = context;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
+        [Authorize(Roles ="User,Admin,Moderator")]
         public ActionResult Index()
         {
             var categories = from category in db.Categories
                              orderby category.Name
                              select category;
-            ViewBag.Categories = categories;
-            return View();
+            return View(categories);
         }
+        [Authorize(Roles = "Admin,Moderator")]
         public ActionResult Show(int id)
         {
-            Category category = db.Categories.Find(id);
-            ViewBag.Category = category;
-            return View();
+            Category category = db.Categories.First(cat => cat.Id == id);
+            return View(category);
         }
+        [Authorize(Roles = "Admin,Moderator")]
         public ActionResult New()
         {
             return View();
         }
+
         [HttpPost]
+        [Authorize(Roles = "Admin,Moderator")]
         public ActionResult New(Category cat)
         {
-            try
+            if (ModelState.IsValid)
             {
                 db.Categories.Add(cat);
                 db.SaveChanges();
+                TempData["message"] = "Category added successfully!";
                 return RedirectToAction("Index");
             }
-            catch (Exception e)
-            {
-                return View();
-            }
+
+            return View(cat);
         }
-        public ActionResult Edit(int id)
-        {
-            Category category = db.Categories.Find(id);
-            ViewBag.Category = category;
-            return View();
-        }
+       
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Moderator")]
         public ActionResult Edit(int id, Category requestCategory)
         {
-            try
-            {
-                Category category = db.Categories.Find(id);
-
+            Category category = db.Categories.First(cat => cat.Id == id);
+            if (ModelState.IsValid)
+            { 
                 {
                     category.Name = requestCategory.Name;
                     db.SaveChanges();
                 }
+                TempData["message"] = "Category edited successfully!";
                 return RedirectToAction("Index");
             }
-            catch (Exception e)
+            else
             {
-                ViewBag.Category = requestCategory;
-                return View();
+                return View("Show", category);
             }
         }
         [HttpPost]
+        [Authorize(Roles = "Admin,Moderator")]
         public ActionResult Delete(int id)
         {
-            Category category = db.Categories.Find(id);
+            Category category = db.Categories.First(cat => cat.Id == id);
+            if (category == null)
+            {
+                TempData["message"] = "Category not found.";
+                return RedirectToAction("Index");
+            }
             db.Categories.Remove(category);
             db.SaveChanges();
             return RedirectToAction("Index");

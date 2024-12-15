@@ -12,7 +12,13 @@
             <h2 class="card-title">@Model.Name</h2>
             <p class="card-text">@Model.Description</p>
             <p class="text-muted">Created on: @Model.CreationDate.ToShortDateString()</p>
-            <a href="/Groups/Members/@Model.Id" class="btn btn-primary">View Members</a>
+            <div class="d-flex">
+                <a href="/Groups/Members/@Model.Id" class="btn btn-primary">View Members</a>
+                <form method="post" action="/Groups/Delete/@Model.Id" 
+                onsubmit="return confirm('Are you sure you want to delete this group?');">
+                    <button type="submit" class="btn btn-danger">Delete Group</button>
+                </form>
+            </div>
         </div>
     </div>
 
