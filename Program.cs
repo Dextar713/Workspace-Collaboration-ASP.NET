@@ -49,6 +49,18 @@ app.MapControllerRoute(
 );
 
 app.MapControllerRoute(
+    name: "AddUserGroup",
+    pattern: "Groups/AddMember/{groupId?}/{userId?}",
+    defaults: new { controller = "Groups", action = "AddMember" }
+);
+
+app.MapControllerRoute(
+    name: "RemoveUserGroup",
+    pattern: "Groups/RemoveMember/{groupId?}/{userId?}",
+    defaults: new { controller = "Groups", action = "RemoveMember" }
+);
+
+app.MapControllerRoute(
     name: "AddChannel",
     pattern: "Channels/New/{groupId?}",
     defaults: new { controller = "Channels", action = "New" }

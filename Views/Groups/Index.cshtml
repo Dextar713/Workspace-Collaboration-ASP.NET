@@ -33,7 +33,14 @@
                             <h5 class="mb-1">@group.Name</h5>
                             <p class="mb-1 text-muted">@group.Description</p>
                         </div>
+                        
                         <small class="text-muted">@group.CreationDate.ToShortDateString()</small>
+                        @if (!group.Members.Any(member => member.Id == ViewBag.UserId))
+                        {
+                            <form action="/Groups/AddMember/@group.Id/@ViewBag.UserId" method="post" class="mb-0">
+                                <input type="submit" class="btn btn-sm btn-primary" value="Join">
+                            </form>
+                        }
                     </div>
                 </a>
             }

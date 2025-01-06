@@ -1,0 +1,81 @@
+﻿@model Discord2.Models.Group
+
+@{
+    ViewData["Title"] = $"Members of {Model.Name}";
+}
+
+<div class="container mt-4">
+    <partial name="_TempDataPartial" />
+    <h2 class="mb-4">Members of @Model.Name</h2>
+    <p class="text-muted">Group Description: @Model.Description</p>
+    <div class="mb-4">
+        <a href="/Groups/Show/@Model.Id" class="btn btn-secondary">Back to Group</a>
+    </div>
+
+    @if (Model.Members != null && Model.Members.Any())
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Members List</h5>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int table_row = 1;
+                        }
+                        @for (int i=0; i<Model.Members.Count; i++)
+                        {
+                            AppUser member = Model.Members.ElementAt(i);
+                            GroupRole cur_role = Model.GroupRoles.ElementAt(i);
+                            <tr>
+                                <td>@(table_row++)</td>
+                                <td>@member.UserName</td>
+                                <td>@member.Email</td>
+                                
+                                <td>
+                                    <form method="post" action="/Groups/AssignRole">
+                                        <input type="hidden" name="groupId" value="@Model.Id" />
+                                        <input type="hidden" name="userId" value="@member.Id" />
+                                        <select name="role" class="form-select form-select-sm d-inline-block w-auto">
+                                            @foreach (var role in Model.GroupRoles)
+                                            {
+                                                if(role.Id != cur_role.Id)
+                                                {
+                                                <option value="@role.Id">@role.Name</option>
+                                                } else
+                                                {
+                                                    <option value="@role.Id" selected>@role.Name</option>
+                                                }
+                                            }
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form method="post" action="/Groups/RemoveMember" class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to remove this member?');">
+                                        <input type="hidden" name="groupId" value="@Model.Id" />
+                                        <input type="hidden" name="userId" value="@member.Id" />
+                                        <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p class="text-center text-muted">No members found in this group.</p>
+    }
+</div>

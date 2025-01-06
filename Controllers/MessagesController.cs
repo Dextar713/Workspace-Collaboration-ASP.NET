@@ -40,9 +40,18 @@ namespace Discord2.Controllers
         [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult Delete(int id)
         {
+            var userId = _userManager.GetUserId(User);
+            var role = (from m in db.Memberships
+                        where m.UserId == userId
+                        select m.Role).FirstOrDefault();
             Message msg = db.Messages.First(m => m.Id == id);
-            db.Messages.Remove(msg);
-            db.SaveChanges();
+            if (msg.UserId == userId || role.CanManipulateUsers)
+            {
+                db.Messages.Remove(msg);
+                db.SaveChanges();
+                return Redirect("/Channels/Show/" + msg.ChannelId);
+            }
+            TempData["message"] = "You cannot delete messages of other users";
             return Redirect("/Channels/Show/" + msg.ChannelId);
         }
     }

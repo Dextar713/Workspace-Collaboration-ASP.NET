@@ -47,8 +47,14 @@ namespace Discord2.Controllers
             }
 
             var groups = groupsQuery.Distinct().ToList();
-
+            foreach (var g in groups)
+            {
+                g.Members = (from m in db.Memberships
+                             where m.GroupId == g.Id
+                             select m.User).ToList();
+            }
             ViewBag.SearchTerm = searchTerm;
+            ViewBag.UserId = userId;    
             return View(groups);
         }
 
@@ -66,6 +72,7 @@ namespace Discord2.Controllers
                             .ThenInclude(m => m.User)
                             where g.Id == id
                             select g).FirstOrDefault();
+                ViewBag.UserId = userId;
                 return View(data);
             } else
             {
@@ -111,6 +118,15 @@ namespace Discord2.Controllers
         public IActionResult Delete(int id)
         {
             Group? gr = db.Groups.FirstOrDefault(g => g.Id == id);
+            var userId = _userManager.GetUserId(User);
+            var role = (from m in db.Memberships
+                        where m.UserId == userId
+                        select m.Role).FirstOrDefault();
+            if (role.Name!="Admin")
+            {
+                TempData["message"] = "Only admin can delete group";
+                return RedirectToAction("Show", "Groups", new { id });
+            }
             if (gr != null)
             {
                 db.Groups.Remove(gr);
@@ -122,6 +138,74 @@ namespace Discord2.Controllers
                 TempData["message"] = "Group not found.";
                 return RedirectToAction("Index");
             }
+        }
+
+        [Authorize(Roles = "User,Admin,Moderator")]
+        public IActionResult Members(int id)
+        {
+            var group = db.Groups.FirstOrDefault(g => g.Id == id);
+            if(group != null)
+            {
+                group.Members = (from m in db.Memberships 
+                                where m.GroupId == id 
+                                select m.User).ToList();
+                group.GroupRoles = (from m in db.Memberships
+                                 where m.GroupId == id
+                                 select m.Role).ToList();
+                return View(group);
+            } else
+            {
+                TempData["message"] = "Group not found.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "User,Admin,Moderator")]
+        public IActionResult RemoveMember(int? groupId, string? userId)
+        {
+            var membership = db.Memberships.FirstOrDefault(m => m.GroupId == groupId 
+                                                           && m.UserId == userId);
+            var role = (from m in db.Memberships
+                        where m.UserId == userId
+                        select m.Role).FirstOrDefault();
+            if (!role.CanManipulateUsers)
+            {
+                TempData["message"] = "You have no permissions to manipulate users";
+                return RedirectToAction("Members", new { id = groupId });
+            }
+            if (membership != null)
+            { 
+                db.Memberships.Remove(membership);
+                db.SaveChanges();
+                TempData["message"] = "User removed from the group!";
+                return RedirectToAction("Members", new {id = groupId});
+            }
+            else
+            {
+                TempData["message"] = "Membership of the user in the group not found.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "User,Admin,Moderator")]
+        public IActionResult AddMember(int? groupId, string? userId)
+        {
+            var roleId = (from role in db.GroupRoles
+                          where role.Name == "User"
+                          select role.Id).First();
+            Membership membership = new Membership
+            {
+                GroupId = groupId,
+                UserId = userId,
+                GroupRoleId = roleId
+            };
+            
+            db.Memberships.Add(membership);
+            db.SaveChanges();
+            TempData["message"] = "You joined the group!";
+            return RedirectToAction("Show", new { id = groupId });
         }
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+// System.Threading.Channels;
 
 namespace Discord2.Controllers
 {
@@ -39,13 +40,23 @@ namespace Discord2.Controllers
             Channel channel = db.Channels.Include(c => c.Group)
                 .Include(c => c.Messages)
                 .ThenInclude(m => m.User).First(c => c.Id == id);
-            //ViewBag.Channel = channel;
+            var userId = _userManager.GetUserId(User);
+            ViewBag.UserId = userId;
             return View(channel);
         }
 
         [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult New(int groupId)
         {
+            var userId = _userManager.GetUserId(User);
+            var role = (from m in db.Memberships
+                        where m.UserId == userId
+                        select m.Role).FirstOrDefault();
+            if (!role.HasSecretChannelsAccess)
+            {
+                TempData["message"] = "You have no permissions to create channels";
+                return RedirectToAction("Show", "Groups", new { id = groupId });
+            }
             var group = db.Groups.FirstOrDefault(g => g.Id == groupId);
             if (group == null)
             {
@@ -65,9 +76,17 @@ namespace Discord2.Controllers
         [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult New(Channel c)
         {
+            var userId = _userManager.GetUserId(User);
+            var role = (from m in db.Memberships
+                        where m.UserId == userId
+                        select m.Role).FirstOrDefault();
+            if (!role.HasSecretChannelsAccess)
+            {
+                TempData["message"] = "You have no permissions to create channels";
+                return RedirectToAction("Show", "Groups", new { id = c.GroupId });
+            }
             if (ModelState.IsValid)
             {
-                //c.GroupId = groupId;
                 db.Channels.Add(c);
                 db.SaveChanges();
                 TempData["message"] = "Channel created successfully!";
@@ -83,6 +102,15 @@ namespace Discord2.Controllers
         public IActionResult Delete(int id)
         {
             Channel? channel = db.Channels.FirstOrDefault(c => c.Id == id);
+            var userId = _userManager.GetUserId(User);
+            var role = (from m in db.Memberships
+                        where m.UserId == userId
+                        select m.Role).FirstOrDefault();
+            if (!role.HasSecretChannelsAccess)
+            {
+                TempData["message"] = "You have no permissions to delete channels";
+                return RedirectToAction("Show", "Groups", new { id = channel.GroupId });
+            }
             if (channel != null)
             {
                 db.Channels.Remove(channel);

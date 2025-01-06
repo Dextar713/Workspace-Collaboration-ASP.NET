@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Discord2.Models
 {
@@ -18,5 +19,12 @@ namespace Discord2.Models
         public virtual ICollection<Membership>? Memberships { get; set; }
 
         public virtual ICollection<Channel>? Channels { get; set; }
+
+        [NotMapped]
+        public virtual ICollection<AppUser>? Members { get; set; }
+
+        [NotMapped]
+        public virtual ICollection<GroupRole>? GroupRoles { get; set; }
+
     }
 }

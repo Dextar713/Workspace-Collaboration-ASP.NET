@@ -20,7 +20,7 @@ $(document).ready(function () {
                     console.log(data);
                     // Append the new message to the message box
                     var newMessage = `
-                            <div class="message mb-3" id="message-${data.message.id}">
+                            <div class="message mb-3" id="msg-${data.message.Id}">
                                 <strong>${data.message.userName}:</strong> ${data.message.content}
                                 <br />
                                 <small class="text-muted">${data.message.dateTime}</small>
@@ -44,45 +44,41 @@ $(document).ready(function () {
         e.preventDefault(); // Prevent the default context menu
         //alert(e.pageY);
         // Get the message ID
-        const messageId = $(this).data("message-id");
-        
-        // Position the dropdown (context menu) based on mouse click
-        $("#contextMenu").css({
+        const messageId = e.target.id.split("-")[1];
+        console.log(messageId);
+        $("#menu-" + messageId).css({
             display: "block",
-            top: e.pageY + "px",
+            top: "20px",
             left: e.pageX + "px"
-            //width: 50 + "px"
+            //transform: none
+   
         });
-
+        //alert(e.pageX + " " + e.pageY);
         // Store the message ID in the context menu
-        $("#contextMenu").data("message-id", messageId);
-
+        //$("#menu-"+messageId).data("message-id", messageId);
+        //$("#menu-" + messageId + " > dropdown-menu").css({ display: "block" });
         // Show the dropdown
-        $('#contextMenuButton').click();
+        $('#btn-'+messageId).click();
     });
 
     // Hide context menu on clicking elsewhere
     $(document).on("click", function (e) {
         if (!$(e.target).closest('.dropdown').length) {
-            $('#contextMenu').hide();
+            $('.contextMenu').hide();
         }
     });
 
     // Edit message event
-    $(document).on("click", "#editMessage", function () {
-        const messageId = $("#contextMenu").data("message-id");
-        console.log("Edit Message:", messageId);
-        // Trigger your edit functionality here
+    $(document).on("click", ".editMessage", function (e) {
+        const messageId = e.target.id;
         alert(`Editing message with ID: ${messageId}`);
-        $('#contextMenu').hide();
+        $('.contextMenu').hide();
     });
 
     // Delete message event
-    $(document).on("click", "#deleteMessage", function () {
-        const messageId = $("#contextMenu").data("message-id");
-        console.log("Delete Message:", messageId);
-        // Trigger your delete functionality here
+    $(document).on("click", ".deleteMessage", function (e) {
+        const messageId = e.target.id;
         alert(`Deleting message with ID: ${messageId}`);
-        $('#contextMenu').hide();
+        $('.contextMenu').hide();
     });
 });
