@@ -31,7 +31,7 @@ $(document).ready(function () {
                     $("#msg-box-" + channelId).scrollTop(0);
                     form.find("input[name='message']").val(''); // Clear the input field
                 } else {
-                    alert("Failed to send message. Please try again.");
+                    alert(data.error_msg);
                 }
             },
             error: function () {

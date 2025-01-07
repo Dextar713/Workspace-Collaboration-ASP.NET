@@ -28,8 +28,8 @@ namespace Discord2.Controllers
             var userId = _userManager.GetUserId(User);
 
             // Fetch groups the user is part of
-            var userGroups = db.Groups
-                .Where(g => g.Memberships.Any(m => m.UserId == userId));
+            var userGroups = db.Groups.Include(g => g.Memberships).ThenInclude(m => m.User)
+                .Where(g => g.Memberships!.Any(m => m.UserId == userId));
 
             var searchTerm = HttpContext.Request.Query["searchTerm"].FirstOrDefault()?.Trim();
 
@@ -39,7 +39,7 @@ namespace Discord2.Controllers
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 // Fetch groups that match the search term
-                var searchedGroups = db.Groups
+                var searchedGroups = db.Groups.Include(g => g.Memberships).ThenInclude(m => m.User)
                     .Where(g => g.Name.Contains(searchTerm) || g.Description.Contains(searchTerm));
 
                 // Combine user's groups with searched groups
@@ -49,9 +49,10 @@ namespace Discord2.Controllers
             var groups = groupsQuery.Distinct().ToList();
             foreach (var g in groups)
             {
-                g.Members = (from m in db.Memberships
-                             where m.GroupId == g.Id
-                             select m.User).ToList();
+                g.Members = g.Memberships!
+                                .Select(m => m.User!)
+                                .Distinct()
+                                .ToList();
             }
             ViewBag.SearchTerm = searchTerm;
             ViewBag.UserId = userId;    
@@ -143,15 +144,18 @@ namespace Discord2.Controllers
         [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult Members(int id)
         {
-            var group = db.Groups.FirstOrDefault(g => g.Id == id);
+            var group = db.Groups.Include(g => g.Memberships).ThenInclude(m => m.User)
+                        .FirstOrDefault(g => g.Id == id);
             if(group != null)
             {
-                group.Members = (from m in db.Memberships 
-                                where m.GroupId == id 
-                                select m.User).ToList();
-                group.GroupRoles = (from m in db.Memberships
-                                 where m.GroupId == id
-                                 select m.Role).ToList();
+                group.Members = group.Memberships
+                                .Where(m => m.User != null)
+                                .Select(m => m.User!)
+                                .Distinct()
+                                .ToList();
+                group.GroupRoles = db.Memberships
+                                   .Where(m => m.Role != null)
+                                   .Select(m => m.Role!).Distinct().ToList();
                 return View(group);
             } else
             {
@@ -166,10 +170,12 @@ namespace Discord2.Controllers
         {
             var membership = db.Memberships.FirstOrDefault(m => m.GroupId == groupId 
                                                            && m.UserId == userId);
-            var role = (from m in db.Memberships
-                        where m.UserId == userId
-                        select m.Role).FirstOrDefault();
-            if (!role.CanManipulateUsers)
+            var manipulator_id = _userManager.GetUserId(User);
+            bool canManipulate = (from m in db.Memberships
+                        where m.UserId == manipulator_id
+                        && m.GroupId == groupId
+                        select m.Role.CanManipulateUsers).First();
+            if (!canManipulate && manipulator_id != userId)
             {
                 TempData["message"] = "You have no permissions to manipulate users";
                 return RedirectToAction("Members", new { id = groupId });
@@ -178,8 +184,15 @@ namespace Discord2.Controllers
             { 
                 db.Memberships.Remove(membership);
                 db.SaveChanges();
-                TempData["message"] = "User removed from the group!";
-                return RedirectToAction("Members", new {id = groupId});
+                if (userId != manipulator_id)
+                {
+                    TempData["message"] = "User removed from the group!";
+                    return RedirectToAction("Members", new { id = groupId });
+                } else
+                {
+                    TempData["message"] = "You left the group!";
+                    return RedirectToAction("Index");
+                }
             }
             else
             {
@@ -206,6 +219,32 @@ namespace Discord2.Controllers
             db.SaveChanges();
             TempData["message"] = "You joined the group!";
             return RedirectToAction("Show", new { id = groupId });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "User,Admin,Moderator")]
+        public IActionResult AssignRole(int? groupId, string? userId, int? new_role_id)
+        {
+            if (ModelState.IsValid)
+            {
+                var manipulator_id = _userManager.GetUserId(User);
+                bool canManipulate = (from m in db.Memberships.Include(mem => mem.Role)
+                                      where m.GroupId == groupId
+                                      && m.UserId == manipulator_id
+                                      select m.Role.CanManipulateUsers).First();
+
+                Membership membership = db.Memberships.Include(m => m.Role).Where(m => m.GroupId == groupId
+                                                            && m.UserId == userId).FirstOrDefault();
+                if (canManipulate)
+                {
+
+                    membership.GroupRoleId = new_role_id;
+                    db.SaveChanges();
+                    return RedirectToAction("Members", new { id = groupId });
+                }
+                TempData["message"] = "You have no permissions to change user roles";
+            } 
+            return RedirectToAction("Members", new { id = groupId });
         }
     }
 }

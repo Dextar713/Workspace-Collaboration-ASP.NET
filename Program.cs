@@ -49,6 +49,12 @@ app.MapControllerRoute(
 );
 
 app.MapControllerRoute(
+    name: "ChangeUserRole",
+    pattern: "Groups/AssignRole/{groupId?}/{userId?}/{new_role_id?}",
+    defaults: new { controller = "Groups", action = "AssignRole" }
+);
+
+app.MapControllerRoute(
     name: "AddUserGroup",
     pattern: "Groups/AddMember/{groupId?}/{userId?}",
     defaults: new { controller = "Groups", action = "AddMember" }

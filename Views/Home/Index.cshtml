@@ -28,7 +28,7 @@
                             <div class="card-body">
                                 <h5 class="card-title">@group.Name</h5>
                                 <p class="card-text">@group.Description</p>
-                                @if (!group.Members.Any(member => member.Id == ViewBag.UserId))
+                                @if (!group.Members!.Any(member => member.Id == ViewBag.UserId))
                                 {
                                     <form action="/Groups/AddMember/@group.Id/@ViewBag.UserId" method="post" class="mb-0">
                                         <input type="submit" class="btn btn-sm btn-primary" value="Join Group">

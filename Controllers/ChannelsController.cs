@@ -51,6 +51,7 @@ namespace Discord2.Controllers
             var userId = _userManager.GetUserId(User);
             var role = (from m in db.Memberships
                         where m.UserId == userId
+                        && m.GroupId == groupId
                         select m.Role).FirstOrDefault();
             if (!role.HasSecretChannelsAccess)
             {
@@ -79,6 +80,7 @@ namespace Discord2.Controllers
             var userId = _userManager.GetUserId(User);
             var role = (from m in db.Memberships
                         where m.UserId == userId
+                        && m.GroupId == c.GroupId
                         select m.Role).FirstOrDefault();
             if (!role.HasSecretChannelsAccess)
             {
@@ -105,6 +107,7 @@ namespace Discord2.Controllers
             var userId = _userManager.GetUserId(User);
             var role = (from m in db.Memberships
                         where m.UserId == userId
+                        && m.GroupId == channel.GroupId
                         select m.Role).FirstOrDefault();
             if (!role.HasSecretChannelsAccess)
             {
@@ -128,8 +131,8 @@ namespace Discord2.Controllers
         public IActionResult SendMessage(int channelId, string message)
         {
             var channel = db.Channels.Include(c => c.Group).FirstOrDefault(c => c.Id == channelId);
-            System.Diagnostics.Debug.WriteLine($"Message: {message}");
-            System.Diagnostics.Debug.WriteLine($"Channel Id: {channelId}");
+            //System.Diagnostics.Debug.WriteLine($"Message: {message}");
+            //System.Diagnostics.Debug.WriteLine($"Channel Id: {channelId}");
             if (channel == null || string.IsNullOrWhiteSpace(message))
             {
                 return Json(new { success = false });
@@ -137,8 +140,19 @@ namespace Discord2.Controllers
 
             // Create a new message
             var userId = _userManager.GetUserId(User);
+            bool canWrite = db.Memberships.Include(m => m.Role).Where(m => m.GroupId == channel.GroupId
+                                                && m.UserId == userId)
+                                           .Select(m => m.Role.CanWrite).First();
+            if(!canWrite)
+            {
+                return Json(new
+                {
+                    success = false,
+                    error_msg = "You are banned and can't write in channels"
+                });
+            }
             var userName = _userManager.GetUserName(User);
-            System.Diagnostics.Debug.WriteLine($"UserName: {userName}");
+            //System.Diagnostics.Debug.WriteLine($"UserName: {userName}");
             var newMessage = new Message
             {
                 Content = message,

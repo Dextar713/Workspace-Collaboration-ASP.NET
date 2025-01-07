@@ -31,10 +31,11 @@
                         @{
                             int table_row = 1;
                         }
-                        @for (int i=0; i<Model.Members.Count; i++)
+                        @foreach (var member in Model.Members)
                         {
-                            AppUser member = Model.Members.ElementAt(i);
-                            GroupRole cur_role = Model.GroupRoles.ElementAt(i);
+                            var cur_role_id = Model.Memberships
+                                                .Where(m => m.UserId == member.Id)
+                                                .Select(m => m.GroupRoleId).First();
                             <tr>
                                 <td>@(table_row++)</td>
                                 <td>@member.UserName</td>
@@ -44,10 +45,10 @@
                                     <form method="post" action="/Groups/AssignRole">
                                         <input type="hidden" name="groupId" value="@Model.Id" />
                                         <input type="hidden" name="userId" value="@member.Id" />
-                                        <select name="role" class="form-select form-select-sm d-inline-block w-auto">
+                                        <select name="new_role_id" class="form-select form-select-sm d-inline-block w-auto">
                                             @foreach (var role in Model.GroupRoles)
                                             {
-                                                if(role.Id != cur_role.Id)
+                                                if(role.Id != cur_role_id)
                                                 {
                                                 <option value="@role.Id">@role.Name</option>
                                                 } else

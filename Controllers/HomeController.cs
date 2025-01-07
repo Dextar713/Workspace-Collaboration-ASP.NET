@@ -26,16 +26,18 @@ namespace Discord2.Controllers
 
         public IActionResult Index()
         {
-            var groups = db.Groups.Take(5).ToList();
-            ViewBag.TopGroups = groups;
+            var groups = db.Groups.Include(g => g.Memberships)
+                         .ThenInclude(m => m.User).Take(5).ToList();
             var userId = _userManager.GetUserId(User);
             ViewBag.UserId = userId;
             foreach (var g in groups)
             {
-                g.Members = (from m in db.Memberships
-                             where m.GroupId == g.Id
-                             select m.User).ToList();
+                g.Members = g.Memberships!
+                                .Select(m => m.User!)
+                                .Distinct()
+                                .ToList();
             }
+            ViewBag.TopGroups = groups;
             return View();
         }
 
