@@ -1,0 +1,41 @@
+﻿@model IEnumerable<AppUser>
+
+<h2>User Management</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Avatar</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(user.AvatarPath))
+                    {
+                        <img src="@Url.Content("~/" + user.AvatarPath)" alt="Avatar"
+                             class="rounded-circle"
+                             style="width: 40px; height: 40px; object-fit: cover; border: 2px solid #ccc;" />
+                    }
+                    else
+                    {
+                        <p>No avatar</p>
+                    }
+                </td>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>
+                    <form asp-action="DeleteUser" asp-controller="Admin" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

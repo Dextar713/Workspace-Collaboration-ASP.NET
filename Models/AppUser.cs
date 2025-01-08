@@ -10,5 +10,9 @@ namespace Discord2.Models
         public virtual ICollection<Membership>? Memberships { get; set; }
 
         public virtual ICollection<Message>? Messages { get; set; }
+
+        public string? Bio {  get; set; }
+
+        public string? AvatarPath { get; set; }
     }
 }
