@@ -30,7 +30,8 @@
                                 <p class="card-text">@group.Description</p>
                                 @if (!group.Members!.Any(member => member.Id == ViewBag.UserId))
                                 {
-                                    <form action="/Groups/AddMember/@group.Id/@ViewBag.UserId" method="post" class="mb-0">
+                                    <form action="/Groups/AddMember/@group.Id/@ViewBag.UserId"
+                                          method="post" class="mb-0 JoinForm">
                                         <input type="submit" class="btn btn-sm btn-primary" value="Join Group">
                                     </form>
                                 } else

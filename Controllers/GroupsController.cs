@@ -1,8 +1,10 @@
 ﻿using Discord2.Data;
+using Discord2.Hubs;
 using Discord2.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Channels;
 
@@ -13,13 +15,16 @@ namespace Discord2.Controllers
         private readonly ApplicationDbContext db;
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IHubContext<ChatHub> _hubContext;
         public GroupsController(ApplicationDbContext context, 
                                 UserManager<AppUser> userManager,
-                                RoleManager<IdentityRole> roleManager) 
+                                RoleManager<IdentityRole> roleManager,
+                                IHubContext<ChatHub> hubcontext) 
         {
             _userManager = userManager;
             _roleManager = roleManager;
             db = context;
+            _hubContext = hubcontext;
         }
 
         [Authorize(Roles = "User,Admin,Moderator")]
@@ -107,6 +112,8 @@ namespace Discord2.Controllers
                 };
                 db.Memberships.Add(membership);
                 db.SaveChanges();
+                //var connectionId = HttpContext.Connection.Id;
+                //_hubContext.Groups.AddToGroupAsync(userId, g.Id.ToString());
                 return RedirectToAction("Index");
             } else
             {
@@ -263,6 +270,8 @@ namespace Discord2.Controllers
             
             db.Memberships.Add(membership);
             db.SaveChanges();
+            //var connectionId = HttpContext.Connection.Id;
+            //_hubContext.Groups.AddToGroupAsync(connectionId, groupId.ToString());
             TempData["message"] = "You joined the group!";
             return RedirectToAction("Show", new { id = groupId });
         }

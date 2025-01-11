@@ -205,7 +205,7 @@ namespace Discord2.Controllers
                 Content = message,
                 DateTime = DateTime.Now,
                 ChannelId = channelId,
-                UserId = userId // Assuming your User model has an ID
+                UserId = userId 
             };
 
             // Add the message to the database
@@ -221,7 +221,9 @@ namespace Discord2.Controllers
                     Id = newMessage.Id,
                     UserName = userName,
                     Content = newMessage.Content,
-                    DateTime = newMessage.DateTime.ToString("g")
+                    DateTime = newMessage.DateTime.ToString("g"),
+                    GroupId = channel.GroupId,
+                    ChannelId = channelId
                 }
             };
             
