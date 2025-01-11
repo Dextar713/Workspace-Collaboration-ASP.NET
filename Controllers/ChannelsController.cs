@@ -101,6 +101,53 @@ namespace Discord2.Controllers
         }
 
         [Authorize(Roles = "User,Admin,Moderator")]
+        public IActionResult Edit(int id)
+        {
+            var channel = db.Channels.FirstOrDefault(c => c.Id == id);
+            var userId = _userManager.GetUserId(User);
+            var role = (from m in db.Memberships
+                        where m.UserId == userId
+                        && m.GroupId == channel.GroupId
+                        select m.Role).FirstOrDefault();
+            if (!role.HasSecretChannelsAccess)
+            {
+                TempData["message"] = "You have no permissions to edit channels";
+                return RedirectToAction("Show", "Groups", new { id = channel.GroupId });
+            }
+            ViewBag.Categories = db.Categories.Select(c => new { c.Id, c.Name }).ToList();
+            return View(channel);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "User,Admin,Moderator")]
+        public IActionResult Edit(int id, Channel c)
+        {
+            var userId = _userManager.GetUserId(User);
+            var role = (from m in db.Memberships
+                        where m.UserId == userId
+                        && m.GroupId == c.GroupId
+                        select m.Role).FirstOrDefault();
+            if (!role.HasSecretChannelsAccess)
+            {
+                TempData["message"] = "You have no permissions to edit channels";
+                return RedirectToAction("Show", "Groups", new { id = c.GroupId });
+            }
+            var channel = db.Channels.FirstOrDefault(c => c.Id == id);
+            if (ModelState.IsValid)
+            {
+                channel.Name = c.Name;
+                channel.Category = c.Category;
+                db.SaveChanges();
+                TempData["message"] = "Channel edited successfully!";
+                return RedirectToAction("Show", "Groups", new { id = c.GroupId });
+            }
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            TempData["message"] = string.Join("; ", errors);
+            ViewBag.Categories = db.Categories.Select(c => new { c.Id, c.Name }).ToList();
+            return View(c);
+        }
+
+        [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult Delete(int id)
         {
             Channel? channel = db.Channels.FirstOrDefault(c => c.Id == id);

@@ -1,28 +1,33 @@
-﻿using Discord2.Models;
+﻿using Discord2.Data;
+using Discord2.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Discord2.Controllers
 {
     public class ProfileController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly ApplicationDbContext db;
 
-        public ProfileController(UserManager<AppUser> userManager)
+        public ProfileController(UserManager<AppUser> userManager,
+                                ApplicationDbContext context)
         {
             _userManager = userManager;
+            db = context;
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin,User,Moderator")]
         public async Task<IActionResult> Edit()
         {
+            UpdateUserStats();
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return NotFound();
             }
-
             var model = new Profile
             {
                 UserName = user.UserName,
@@ -30,6 +35,7 @@ namespace Discord2.Controllers
                 Bio = user.Bio,
                 CurrentAvatarPath = user.AvatarPath
             };
+            ViewBag.CurUser = user;
             return View(model);
         }
 
@@ -37,9 +43,9 @@ namespace Discord2.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(Profile model)
         {
+            var user = await _userManager.GetUserAsync(User);
             if (ModelState.IsValid)
             {
-                var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
                     return NotFound();
@@ -86,8 +92,21 @@ namespace Discord2.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-
+            ViewBag.CurUser = user;
+            UpdateUserStats();
             return View(model);
+        }
+
+        [NonAction]
+        private void UpdateUserStats()
+        {
+            var user = _userManager.GetUserAsync(User).Result;
+            user.TotalGroups = db.Memberships.Where(m => m.UserId == user.Id).Count();
+            user.DaysActive = db.Messages
+                                .Where(m => m.UserId == user.Id) 
+                                .Select(m => m.DateTime.Date) 
+                                .Distinct()                    
+                                .Count();
         }
     }
 

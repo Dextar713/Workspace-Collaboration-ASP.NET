@@ -114,6 +114,51 @@ namespace Discord2.Controllers
             }
         }
 
+        [Authorize(Roles = "User,Admin,Moderator")]
+        public IActionResult Edit(int id)
+        {
+            var g = db.Groups.FirstOrDefault(g => g.Id == id);
+            var userId = _userManager.GetUserId(User);
+            var role = (from m in db.Memberships.Include(m => m.Role)
+                        where m.UserId == userId
+                        && m.GroupId == id
+                        select m.Role).FirstOrDefault();
+            if(role.Name != "Admin")
+            {
+                TempData["message"] = "Only admin can edit group";
+                return RedirectToAction("Show", "Groups", new { id });
+            }
+            return View(g);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "User,Admin,Moderator")]
+        public IActionResult Edit(int id, Group g)
+        {
+            var userId = _userManager.GetUserId(User);
+            var gr = db.Groups.FirstOrDefault(g => g.Id == id);
+            var role = (from m in db.Memberships.Include(m => m.Role)
+                        where m.UserId == userId
+                        && m.GroupId == id
+                        select m.Role).FirstOrDefault();
+            if (role.Name != "Admin")
+            {
+                TempData["message"] = "Only admin can edit group";
+                return RedirectToAction("Show", "Groups", new { id });
+            }
+            if (ModelState.IsValid)
+            {
+                gr.Name = g.Name;
+                gr.Description = g.Description;
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                return View(g);
+            }
+        }
+
         [HttpPost]
         [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult Delete(int id)
@@ -121,7 +166,8 @@ namespace Discord2.Controllers
             Group? gr = db.Groups.FirstOrDefault(g => g.Id == id);
             var userId = _userManager.GetUserId(User);
             var role = (from m in db.Memberships
-                        where m.UserId == userId
+                        where m.UserId == userId 
+                        && m.GroupId == id 
                         select m.Role).FirstOrDefault();
             if (role.Name!="Admin")
             {

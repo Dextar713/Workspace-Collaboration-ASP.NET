@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Discord2.Models
 {
@@ -14,5 +15,13 @@ namespace Discord2.Models
         public string? Bio {  get; set; }
 
         public string? AvatarPath { get; set; }
+
+        public DateTime JoinDate { get; set; } = DateTime.Now;
+
+        [NotMapped]
+        public int TotalGroups { get; set; }
+
+        [NotMapped]
+        public int DaysActive { get; set; }
     }
 }

@@ -1,0 +1,40 @@
+﻿@model Discord2.Models.Channel
+
+@{
+    ViewData["Title"] = "Edit Channel";
+}
+
+<div class="container mt-4">
+    <partial name="_TempDataPartial" />
+
+    <form method="post" asp-controller="Channels" asp-action="Edit" asp-route-id="@Model.Id">
+        <!-- GroupId is hidden to ensure association -->
+        <input type="hidden" asp-for="GroupId" value="@Model.GroupId" />
+        <h3>@Model.GroupId</h3>
+
+        <!-- Channel Name -->
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Channel Name</label>
+            <input asp-for="Name" class="form-control" placeholder="Enter channel name" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CategoryId" class="form-label">Category</label>
+            <select asp-for="CategoryId" class="form-control">
+                <option value="">-- Select a Category --</option>
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <option value="@category.Id">@category.Name</option>
+                }
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+
+        <!-- Submit and Cancel Buttons -->
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">Edit Channel</button>
+            <a href="/Groups/Show/@Model.GroupId" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

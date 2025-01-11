@@ -8,11 +8,12 @@
         var user = UserManager.GetUserAsync(User).Result;
         var avatarPath = user?.AvatarPath;
         <li class="nav-item">
-            <a href="/Profile/Edit" title="Profile">
+            <a href="/Profile/Edit" title="Profile" class="@(avatarPath != null ? "" : "nav-link text-dark")">
                 <img src="@Url.Content("~/" + avatarPath)"
                      alt="Avatar"
-                     class="rounded-circle"
-                     style="width: 40px; height: 40px; object-fit: cover; border: 2px solid #ccc;" />
+                     class="@(avatarPath == null ? "" : "rounded-circle")"
+                     style="@(avatarPath == null ? "" : 
+                               "width: 40px; height: 40px; object-fit: cover; border: 2px solid #ccc;")" />
             </a>
         </li>
     <li class="nav-item">

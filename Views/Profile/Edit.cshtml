@@ -1,44 +1,89 @@
 ﻿@model Profile
 
-<h2>Edit Profile</h2>
+<div class="container mt-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <label for="CurrentAvatar" style="display:block;">Current Avatar</label>
+                    @if (!string.IsNullOrEmpty(Model.CurrentAvatarPath))
+                    {
+                        <img src="@Url.Content("~/" + Model.CurrentAvatarPath)" 
+                            alt="Avatar" class="rounded-circle img-fluid mx-auto mb-3 mt-3" 
+                            style="width: 150px; height: 150px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center 
+                                    justify-content-center mx-auto mb-3 mt-3" 
+                             style="width: 150px; height: 150px;">
+                            <span>No Avatar</span>
+                        </div>
+                    }
 
-@if (TempData["message"] != null)
-{
-    <div class="alert alert-success">@TempData["message"]</div>
-}
+                    <h5 class="card-title">@Model.UserName</h5>
+                    <p class="text-muted">@Model.Email</p>
+                </div>
+            </div>
 
-<form asp-action="Edit" asp-controller="Profile" method="post" enctype="multipart/form-data">
-    <div class="form-group">
-        <label for="UserName">Username</label>
-        <input type="text" class="form-control" id="UserName" name="UserName" value="@Model.UserName" required />
+            <div class="card mt-4">
+                <div class="card-header">User Statistics</div>
+                <div class="card-body">
+                    <p>Total Groups Joined: <strong>@ViewBag.CurUser.TotalGroups</strong></p>
+                    <p>Days Active: <strong>@ViewBag.CurUser.DaysActive</strong></p>
+                    <p>Member Since: <strong>@ViewBag.CurUser.JoinDate.ToString("MMMM dd, yyyy")</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">Edit Profile</div>
+                <div class="card-body">
+                    @if (TempData["message"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["message"]</div>
+                    }
+
+                    <form asp-action="Edit" asp-controller="Profile" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="UserName" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="UserName" name="UserName" value="@Model.UserName" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Bio" class="form-label">Bio</label>
+                            <textarea class="form-control" id="Bio" name="Bio" rows="4">@Model.Bio</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="CurrentAvatar" class="form-label">Current Avatar</label>
+                            @if (!string.IsNullOrEmpty(Model.CurrentAvatarPath))
+                            {
+                                <img src="@Url.Content("~/" + Model.CurrentAvatarPath)" alt="Avatar" class="img-thumbnail" style="max-width: 150px;" />
+                            }
+                            else
+                            {
+                                <p class="text-muted">No avatar uploaded.</p>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Avatar" class="form-label">Upload New Avatar</label>
+                            <input type="file" class="form-control" id="Avatar" name="Avatar" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label for="Email">Email</label>
-        <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" required />
-    </div>
-
-    <div class="form-group">
-        <label for="Bio">Bio</label>
-        <textarea class="form-control" id="Bio" name="Bio">@Model.Bio</textarea>
-    </div>
-
-    <div class="form-group">
-        <label for="CurrentAvatar">Current Avatar</label>
-        @if (!string.IsNullOrEmpty(Model.CurrentAvatarPath))
-        {
-            <img src="@Url.Content("~/" + Model.CurrentAvatarPath)" alt="Avatar" class="img-thumbnail" style="max-width: 150px;" />
-        }
-        else
-        {
-            <p>No avatar uploaded.</p>
-        }
-    </div>
-
-    <div class="form-group">
-        <label for="Avatar">Upload New Avatar</label>
-        <input type="file" class="form-control" id="Avatar" name="Avatar" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-</form>
+</div>
