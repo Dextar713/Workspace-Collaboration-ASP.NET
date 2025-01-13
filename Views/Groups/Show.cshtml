@@ -14,11 +14,18 @@
             <p class="text-muted">Created on: @Model.CreationDate.ToShortDateString()</p>
             <div class="d-flex">
                 <a href="/Groups/Members/@Model.Id" class="btn btn-primary me-2">View Members</a>
-                <a href="/Groups/Edit/@Model.Id" class="btn btn-secondary me-2">Edit</a>
-                <form method="post" action="/Groups/Delete/@Model.Id" 
-                onsubmit="return confirm('Are you sure you want to delete this group?');">
-                    <button type="submit" class="btn btn-danger">Delete Group</button>
-                </form>
+                @if (ViewBag.Role.Name == "Admin" || ViewBag.Role.Name == "Moderator"
+                     || User.IsInRole("Admin"))
+                {
+                    <a href="/Groups/Edit/@Model.Id" class="btn btn-secondary me-2">Edit</a>
+                }
+                @if (ViewBag.Role.Name == "Admin" || User.IsInRole("Admin"))
+                {
+                    <form method="post" action="/Groups/Delete/@Model.Id" 
+                    onsubmit="return confirm('Are you sure you want to delete this group?');">
+                        <button type="submit" class="btn btn-danger">Delete Group</button>
+                    </form>
+                }
             </div>
         </div>
     </div>
@@ -27,9 +34,12 @@
         <!-- Channels Sidebar -->
         <div class="col-md-3">
             <h4>Channels</h4>
-            <div class="mb-3">
-                <a href="/Channels/New/@Model.Id" class="btn btn-success w-100">Add Channel</a>
-            </div>
+            @if (ViewBag.Role.HasSecretChannelsAccess)
+            {
+                <div class="mb-3">
+                    <a href="/Channels/New/@Model.Id" class="btn btn-success w-100">Add Channel</a>
+                </div>
+            }
             <div class="list-group">
                 @if (Model.Channels != null && Model.Channels.Any())
                 {

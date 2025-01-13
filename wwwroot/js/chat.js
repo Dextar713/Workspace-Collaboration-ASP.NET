@@ -33,7 +33,7 @@ $(document).ready(function () {
     $(".JoinForm").submit(function(e) {
         var form = $(this); 
         var groupId = form.attr("action").split("/")[3];
-        alert(groupId);
+        //alert(groupId);
         connection.invoke("JoinGroup", groupId).catch(function (err) {
             return console.error(err.toString());
         });

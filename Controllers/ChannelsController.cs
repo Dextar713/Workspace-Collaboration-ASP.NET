@@ -41,7 +41,8 @@ namespace Discord2.Controllers
                 .Include(c => c.Messages)
                 .ThenInclude(m => m.User).First(c => c.Id == id);
             var userId = _userManager.GetUserId(User);
-            ViewBag.UserId = userId;
+            //ViewBag.UserId = userId;
+            SetCurRole(channel.GroupId);
             return View(channel);
         }
 
@@ -109,7 +110,7 @@ namespace Discord2.Controllers
                         where m.UserId == userId
                         && m.GroupId == channel.GroupId
                         select m.Role).FirstOrDefault();
-            if (!role.HasSecretChannelsAccess)
+            if (!role.HasSecretChannelsAccess && !User.IsInRole("Admin"))
             {
                 TempData["message"] = "You have no permissions to edit channels";
                 return RedirectToAction("Show", "Groups", new { id = channel.GroupId });
@@ -127,7 +128,7 @@ namespace Discord2.Controllers
                         where m.UserId == userId
                         && m.GroupId == c.GroupId
                         select m.Role).FirstOrDefault();
-            if (!role.HasSecretChannelsAccess)
+            if (!role.HasSecretChannelsAccess && !User.IsInRole("Admin"))
             {
                 TempData["message"] = "You have no permissions to edit channels";
                 return RedirectToAction("Show", "Groups", new { id = c.GroupId });
@@ -156,7 +157,7 @@ namespace Discord2.Controllers
                         where m.UserId == userId
                         && m.GroupId == channel.GroupId
                         select m.Role).FirstOrDefault();
-            if (!role.HasSecretChannelsAccess)
+            if (!role.HasSecretChannelsAccess && !User.IsInRole("Admin"))
             {
                 TempData["message"] = "You have no permissions to delete channels";
                 return RedirectToAction("Show", "Groups", new { id = channel.GroupId });
@@ -228,6 +229,18 @@ namespace Discord2.Controllers
             };
             
             return Json(responseMessage);
+        }
+
+        [NonAction]
+        private void SetCurRole(int? groupId)
+        {
+            var userId = _userManager.GetUserId(User);
+            GroupRole role = db.Memberships
+                         .Where(m => m.UserId == userId
+                                && m.GroupId == groupId)
+                         .Select(m => m.Role).First();
+            ViewBag.Role = role;
+            ViewBag.UserId = userId;
         }
     }
 }

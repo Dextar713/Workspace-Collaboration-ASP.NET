@@ -78,7 +78,8 @@ namespace Discord2.Controllers
                             .ThenInclude(m => m.User)
                             where g.Id == id
                             select g).FirstOrDefault();
-                ViewBag.UserId = userId;
+                //ViewBag.UserId = userId;
+                SetCurRole(id);
                 return View(data);
             } else
             {
@@ -130,7 +131,7 @@ namespace Discord2.Controllers
                         where m.UserId == userId
                         && m.GroupId == id
                         select m.Role).FirstOrDefault();
-            if(role.Name != "Admin")
+            if(role.Name != "Admin" && !User.IsInRole("Admin"))
             {
                 TempData["message"] = "Only admin can edit group";
                 return RedirectToAction("Show", "Groups", new { id });
@@ -147,8 +148,8 @@ namespace Discord2.Controllers
             var role = (from m in db.Memberships.Include(m => m.Role)
                         where m.UserId == userId
                         && m.GroupId == id
-                        select m.Role).FirstOrDefault();
-            if (role.Name != "Admin")
+                        select m.Role).FirstOrDefault(); 
+            if (role.Name != "Admin" && !User.IsInRole("Admin"))
             {
                 TempData["message"] = "Only admin can edit group";
                 return RedirectToAction("Show", "Groups", new { id });
@@ -176,7 +177,7 @@ namespace Discord2.Controllers
                         where m.UserId == userId 
                         && m.GroupId == id 
                         select m.Role).FirstOrDefault();
-            if (role.Name!="Admin")
+            if (role.Name!="Admin" && !User.IsInRole("Admin"))
             {
                 TempData["message"] = "Only admin can delete group";
                 return RedirectToAction("Show", "Groups", new { id });
@@ -209,6 +210,7 @@ namespace Discord2.Controllers
                 group.GroupRoles = db.Memberships
                                    .Where(m => m.Role != null)
                                    .Select(m => m.Role!).Distinct().ToList();
+                SetCurRole(id);
                 return View(group);
             } else
             {
@@ -301,5 +303,18 @@ namespace Discord2.Controllers
             } 
             return RedirectToAction("Members", new { id = groupId });
         }
+
+        [NonAction]
+        private void SetCurRole(int? groupId)
+        {
+            var userId = _userManager.GetUserId(User);
+            GroupRole role = db.Memberships
+                         .Where(m => m.UserId == userId
+                                && m.GroupId == groupId)
+                         .Select(m => m.Role).First();
+            ViewBag.Role = role;
+            ViewBag.UserId = userId;
+        }
+
     }
 }
