@@ -6,6 +6,8 @@ namespace Discord2.Models
     {
         [Key]
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "Group Role Name is required")]
         public string Name { get; set; }
 
         public bool CanWrite { get; set; } = true;

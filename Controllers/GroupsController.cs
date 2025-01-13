@@ -70,7 +70,7 @@ namespace Discord2.Controllers
             var userId = _userManager.GetUserId(User);
             bool isUserInGroup = db.Memberships
                                 .Any(m => m.UserId == userId && m.GroupId == id);
-            if (isUserInGroup || User.IsInRole("Admin"))
+            if (isUserInGroup || User.IsInRole("Admin") || User.IsInRole("Moderator"))
             {
 
                 var data = (from g in db.Groups.Include(g => g.Channels).ThenInclude(c => c.Category)
@@ -131,7 +131,7 @@ namespace Discord2.Controllers
                         where m.UserId == userId
                         && m.GroupId == id
                         select m.Role).FirstOrDefault();
-            if(role.Name != "Admin" && !User.IsInRole("Admin"))
+            if(role.Name != "Admin" && !User.IsInRole("Admin") && !User.IsInRole("Moderator"))
             {
                 TempData["message"] = "Only admin can edit group";
                 return RedirectToAction("Show", "Groups", new { id });
@@ -149,7 +149,7 @@ namespace Discord2.Controllers
                         where m.UserId == userId
                         && m.GroupId == id
                         select m.Role).FirstOrDefault(); 
-            if (role.Name != "Admin" && !User.IsInRole("Admin"))
+            if (role.Name != "Admin" && !User.IsInRole("Admin") && !User.IsInRole("Moderator"))
             {
                 TempData["message"] = "Only admin can edit group";
                 return RedirectToAction("Show", "Groups", new { id });

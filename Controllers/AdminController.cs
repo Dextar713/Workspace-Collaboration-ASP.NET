@@ -13,14 +13,14 @@ namespace Discord2.Controllers
             _db = db;
         }
 
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UserList()
         {
             var users = _db.Users.ToList();
             return View(users);
         }
 
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult DeleteUser(string id)
         {

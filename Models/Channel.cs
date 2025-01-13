@@ -10,10 +10,10 @@ namespace Discord2.Models
         [Required(ErrorMessage = "The name is required!")]
         public string Name { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Channel group is required!")]
         public int? GroupId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Channel category is required!")]
         public int? CategoryId { get; set; }
 
         public virtual Group? Group { get; set; }

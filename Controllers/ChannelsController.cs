@@ -110,7 +110,7 @@ namespace Discord2.Controllers
                         where m.UserId == userId
                         && m.GroupId == channel.GroupId
                         select m.Role).FirstOrDefault();
-            if (!role.HasSecretChannelsAccess && !User.IsInRole("Admin"))
+            if (!role.HasSecretChannelsAccess && !User.IsInRole("Admin") && !User.IsInRole("Moderator"))
             {
                 TempData["message"] = "You have no permissions to edit channels";
                 return RedirectToAction("Show", "Groups", new { id = channel.GroupId });
@@ -128,7 +128,7 @@ namespace Discord2.Controllers
                         where m.UserId == userId
                         && m.GroupId == c.GroupId
                         select m.Role).FirstOrDefault();
-            if (!role.HasSecretChannelsAccess && !User.IsInRole("Admin"))
+            if (!role.HasSecretChannelsAccess && !User.IsInRole("Admin") && !User.IsInRole("Moderator"))
             {
                 TempData["message"] = "You have no permissions to edit channels";
                 return RedirectToAction("Show", "Groups", new { id = c.GroupId });
@@ -157,7 +157,7 @@ namespace Discord2.Controllers
                         where m.UserId == userId
                         && m.GroupId == channel.GroupId
                         select m.Role).FirstOrDefault();
-            if (!role.HasSecretChannelsAccess && !User.IsInRole("Admin"))
+            if (!role.HasSecretChannelsAccess && !User.IsInRole("Admin") && !User.IsInRole("Moderator"))
             {
                 TempData["message"] = "You have no permissions to delete channels";
                 return RedirectToAction("Show", "Groups", new { id = channel.GroupId });
