@@ -3,6 +3,7 @@ using Discord2.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Discord2.Controllers
 {
@@ -40,19 +41,31 @@ namespace Discord2.Controllers
         [Authorize(Roles = "User,Admin,Moderator")]
         public IActionResult Delete(int id)
         {
+            System.Diagnostics.Debug.WriteLine("------------------------------- ");
+            System.Diagnostics.Debug.WriteLine($"Message delete with id: {id}");
             var userId = _userManager.GetUserId(User);
+            Message msg = db.Messages.Include(m => m.Channel).First(m => m.Id == id);
+            var groupId = db.Groups.Where(g => g.Id == msg.Channel.GroupId).FirstOrDefault().Id;
             var role = (from m in db.Memberships
                         where m.UserId == userId
+                        && m.GroupId == groupId
                         select m.Role).FirstOrDefault();
-            Message msg = db.Messages.First(m => m.Id == id);
             if (msg.UserId == userId || role.CanManipulateUsers)
             {
                 db.Messages.Remove(msg);
                 db.SaveChanges();
-                return Redirect("/Channels/Show/" + msg.ChannelId);
+                return Json(new
+                {
+                    success = true,
+                    messageId = id
+                });
             }
-            TempData["message"] = "You cannot delete messages of other users";
-            return Redirect("/Channels/Show/" + msg.ChannelId);
+            //TempData["message"] = "You cannot delete messages of other users";
+            return Json(new
+            {
+                success = false,
+                error_msg = "You cannot delete messages of other users"
+            });
         }
     }
 }

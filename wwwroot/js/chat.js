@@ -1,4 +1,6 @@
 ﻿
+//import BootstrapMenu from 'bootstrap-menu';
+
 var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 
 connection.start().then(function () {
@@ -14,7 +16,7 @@ connection.on("ReceiveMessage", function (data_msg) {
     if (data_msg.success) {
         // Append the new message to the message box
         var newMessage = `
-                 <div class="message mb-3" id="msg-${data_msg.message.Id}">
+                 <div class="message mb-3" id="msg-${data_msg.message.id}">
                      <strong>${data_msg.message.userName}:</strong> ${data_msg.message.content}
                      <br />
                      <small class="text-muted">${data_msg.message.dateTime}</small>
@@ -23,10 +25,19 @@ connection.on("ReceiveMessage", function (data_msg) {
         $("#msg-box-" + data_msg.message.channelId).prepend(newMessage);
         $("#msg-box-" + data_msg.message.channelId).scrollTop(0);
         send_form.find("input[name='message']").val(''); // Clear the input field
+        setTimeout(() => {
+            attachDropdown("#msg-" + data_msg.message.id);
+        }, 100);
+        //attachDropdown("#msg-"+data_msg.message.Id);
     } else {
         alert(data_msg.error_msg);
     }
 
+});
+
+connection.on("DeleteMessage", function (msgId) {
+    var messageElement = $("#msg-" + msgId);
+    messageElement.remove();
 });
 
 $(document).ready(function () {
@@ -38,6 +49,7 @@ $(document).ready(function () {
             return console.error(err.toString());
         });
     })
+    attachDropdown(".message");
 
     $("form[id^='messageForm']").submit(function (e) {
         e.preventDefault(); // Prevent the default form submission
@@ -60,62 +72,86 @@ $(document).ready(function () {
                 connection.invoke("SendMessageToGroup", data_msg.message.groupId.toString(), data_msg).catch(function (err) {
                     return console.error(err.toString());
                 });
-                /*
-                if (data.success) {
-                    var newMessage = `
-                            <div class="message mb-3" id="msg-${data.message.Id}">
-                                <strong>${data.message.userName}:</strong> ${data.message.content}
-                                <br />
-                                <small class="text-muted">${data.message.dateTime}</small>
-                            </div>
-                        `;
-                    
-                    $("#msg-box-" + channelId).prepend(newMessage);
-                    $("#msg-box-" + channelId).scrollTop(0);
-                    form.find("input[name='message']").val(''); 
-                } else {
-                    alert(data.error_msg);
-                } */
             },
             error: function () {
                 alert("An error occurred. Please try again.");
             }
         });
     });
-
-    $(".message").on("contextmenu", function (e) {
-        e.preventDefault(); // Prevent the default context menu
-        // Get the message ID
-        const messageId = e.target.id.split("-")[1];
-        console.log(messageId);
-        $("#menu-" + messageId).css({
-            display: "block",
-            top: "20px",
-            left: e.pageX + "px"
-            //transform: none
-        });
-        
-        // Show the dropdown
-        $('#btn-'+messageId).click();
-    });
-
-    // Hide context menu on clicking elsewhere
-    $(document).on("click", function (e) {
-        if (!$(e.target).closest('.dropdown').length) {
-            $('.contextMenu').hide();
-        }
-    });
-
-    // Edit message event
-    $(document).on("click", ".editMessage", function (e) {
-        const messageId = e.target.id;
-        alert(`Editing message with ID: ${messageId}`);
-        $('.contextMenu').hide();
-    });
-
-    // Delete message event
-    $(document).on("click", ".deleteMessage", function (e) {
-        const messageId = e.target.id;
-        $('.contextMenu').hide();
-    });
+    
 });
+
+function attachDropdown(elem) {
+    document.querySelectorAll(elem).forEach((element) => {
+        element.addEventListener("contextmenu", (event) => {
+            event.preventDefault(); // Prevent default right-click behavior
+
+            document.querySelectorAll(".dropdown-menu").forEach((menu) => menu.remove());
+
+            // Create dropdown dynamically
+            const dropdownMenu = document.createElement("div");
+            dropdownMenu.className = "dropdown-menu show";
+            dropdownMenu.style.position = "absolute";
+            dropdownMenu.style.left = `${event.clientX + window.scrollX}px`;
+            dropdownMenu.style.top = `${event.clientY + window.scrollY}px`;
+            dropdownMenu.style.zIndex = 1050;
+
+            // Add menu items
+            dropdownMenu.innerHTML = `
+                <button class="dropdown-item editMessage">Edit</button>
+                <button class="dropdown-item deleteMessage">Delete</button>
+            `;
+
+            // Append to the body
+            document.body.appendChild(dropdownMenu);
+
+            // Add Bootstrap's Dropdown functionality
+            const bootstrapDropdown = new bootstrap.Dropdown(dropdownMenu);
+
+            // Attach event listeners for menu actions
+            dropdownMenu.querySelector(".editMessage").addEventListener("click", () => {
+                alert("Edited message with id: "+ element.id);
+                dropdownMenu.remove();
+            });
+
+            dropdownMenu.querySelector(".deleteMessage").addEventListener("click", () => {
+                //alert("Delete clicked for:", element.id);
+                //console.log(element);
+                var msgId = element.id.replace("msg-", "");
+                //alert(msgId);
+                
+                $.ajax({
+                    url: '/Messages/Delete',
+                    type: 'POST',
+                    data: {
+                        id: msgId
+                    },
+                    dataType: "json",
+                    success: function (res) {
+                        if (res.success) {
+                            console.log(res);
+                            connection.invoke("DeleteMessage", msgId).catch(function (err) {
+                                return console.error(err.toString());
+                            });
+                            //alert("Message deleted!");
+                        } else {
+                            alert(res.error_msg);
+                        }
+
+                    },
+                    error: function () {
+                        alert("An error occurred. Please try again.");
+                    }
+                });
+                
+                dropdownMenu.remove();
+            });
+
+            // Remove dropdown on outside click
+            document.addEventListener("click", () => {
+                dropdownMenu.remove();
+            }, { once: true });
+        });
+    });
+
+}

@@ -30,5 +30,10 @@ namespace Discord2.Hubs
             //System.Diagnostics.Debug.WriteLine("----------------------- ");
             await Clients.All.SendAsync("ReceiveMessage", data_msg);
         }
+
+        public async Task DeleteMessage(string messageId)
+        {
+            await Clients.All.SendAsync("DeleteMessage", messageId);
+        }
     }
 } 

@@ -17,7 +17,8 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">Members List</h5>
-                <table class="table table-hover">
+                <div class="table-responsive">
+                <table class="table table-hover table-bordered">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -44,7 +45,7 @@
                                 <td>
                                     @if (ViewBag.Role.CanManipulateUsers)
                                     {
-                                        <form method="post" action="/Groups/AssignRole">
+                                            <form method="post" action="/Groups/AssignRole" class="d-flex align-items-center flex-wrap">
                                             <input type="hidden" name="groupId" value="@Model.Id" />
                                             <input type="hidden" name="userId" value="@member.Id" />
                                             <select name="new_role_id" class="form-select form-select-sm d-inline-block w-auto">
@@ -59,7 +60,7 @@
                                                     }
                                                 }
                                             </select>
-                                            <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                            <button type="submit" class="btn btn-sm btn-primary text-nowrap">Update</button>
                                         </form>
                                     } else 
                                     {
@@ -80,7 +81,7 @@
                                         onsubmit="return confirm('Are you sure you want to remove this member?');">
                                             <input type="hidden" name="groupId" value="@Model.Id" />
                                             <input type="hidden" name="userId" value="@member.Id" />
-                                            <button type="submit" class="btn btn-sm btn-danger">@(ViewBag.UserId==member.Id?"Leave":"Remove")</button>
+                                            <button type="submit" class="btn btn-sm btn-danger text-nowrap">@(ViewBag.UserId==member.Id?"Leave":"Remove")</button>
                                         </form>
                                     </td>
                                 }
@@ -88,6 +89,7 @@
                         }
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     }
